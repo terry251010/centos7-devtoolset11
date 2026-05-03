@@ -1,17 +1,23 @@
 FROM centos:7
 
-# 替换为Vault归档仓库（CentOS 7已EOL）
+# 替换为Vault归档仓库
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
     yum clean all && \
     yum makecache
 
-# 安装SCL仓库（使用归档源）
-RUN yum install -y centos-release-scl && \
-    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
-    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
-    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
-    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
+# 手动创建SCL仓库配置文件
+RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo 'name=CentOS-7 - SCLo scl' >> /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo 'baseurl=http://vault.centos.org/centos/7/sclo/x86_64/sclo/' >> /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo 'gpgcheck=0' >> /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo 'enabled=1' >> /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo '' >> /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
+    echo '[centos-sclo-rh]' > /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
+    echo 'name=CentOS-7 - SCLo rh' >> /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
+    echo 'baseurl=http://vault.centos.org/centos/7/sclo/x86_64/rh/' >> /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
+    echo 'gpgcheck=0' >> /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
+    echo 'enabled=1' >> /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo && \
     yum clean all && \
     yum makecache
 
@@ -19,7 +25,11 @@ RUN yum install -y centos-release-scl && \
 RUN yum install -y devtoolset-11 && \
     yum clean all
 
-RUN echo "source /opt/rh/devtoolset-11/enable" >>/etc/profile
+# 设置环境变量，永久启用Devtoolset 11
+ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-11/root/usr/lib64:/opt/rh/devtoolset-11/root/usr/lib:$LD_LIBRARY_PATH
+ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
+ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
 
 # 验证安装
 RUN gcc --version && g++ --version
