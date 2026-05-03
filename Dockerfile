@@ -23,12 +23,12 @@ RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
 
 # 安装Devtoolset 11
 RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel \
-                   texinfo wget gettext vim cmake ninja-build && \
+                   texinfo wget gettext vim cmake ninja-build rh-python38 && \
     yum groupinstall "Development Tools" -y && \
     yum clean all
 
 # 设置环境变量，永久启用Devtoolset 11
-ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
+ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/rh/rh-python38/root/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-11/root/usr/lib64:/opt/rh/devtoolset-11/root/usr/lib:$LD_LIBRARY_PATH
 ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
@@ -71,6 +71,33 @@ RUN wget https://ftp.gnu.org/gnu/mpfr/mpfr-4.1.0.tar.bz2 -O /tmp/mpfr.tar.gz && 
     tar -xf /tmp/mpfr.tar.gz -C /tmp && \
     cd /tmp/mpfr-4.1.0 && \
     ./configure --prefix=/usr/local --with-gmp=/usr/local --enable-static --disable-shared && \
+    make -j$(nproc) && \
+    make install && \
+    # 清理源码文件以减小镜像体积
+    rm -rf /tmp/*
+
+RUN wget https://ftp.gnu.org/gnu/mpc/mpc-1.2.1.tar.gz -O /tmp/mpc.tar.gz && \
+    tar -xf /tmp/mpc.tar.gz -C /tmp && \
+    cd /tmp/mpc-1.2.1 && \
+    ./configure --prefix=/usr/local --with-gmp=/usr/local --with-mpfr=/usr/local --enable-static --disable-shared && \
+    make -j$(nproc) && \
+    make install && \
+    # 清理源码文件以减小镜像体积
+    rm -rf /tmp/* 
+    
+RUN wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2 -O /tmp/isl.tar.gz && \
+    tar -xf /tmp/isl.tar.gz -C /tmp && \
+    cd /tmp/isl-0.24 && \
+    ./configure --prefix=/usr/local --with-gmp=/usr/local --enable-static --disable-shared && \
+    make -j$(nproc) && \
+    make install && \
+    # 清理源码文件以减小镜像体积
+    rm -rf /tmp/*     
+    
+RUN wget https://github.com/Kitware/CMake/archive/refs/tags/v3.31.0.tar.gz -O /tmp/cmake.tar.gz && \
+    tar -xf /tmp/cmake.tar.gz -C /tmp && \
+    cd /tmp/CMake-3.31.0/ && \
+    ./bootstrap --prefix=/usr/local --parallel=10 && \
     make -j$(nproc) && \
     make install && \
     # 清理源码文件以减小镜像体积
