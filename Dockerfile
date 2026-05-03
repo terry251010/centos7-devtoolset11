@@ -23,7 +23,7 @@ RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
 
 # 安装Devtoolset 11
 RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel \
-                   texinfo wget gettext && \
+                   texinfo wget gettext vim && \
     yum groupinstall "Development Tools" -y && \
     yum clean all
 
@@ -56,7 +56,25 @@ RUN wget https://github.com/mirror/ncurses/archive/refs/tags/v6.4.tar.gz -O /tmp
     make -j$(nproc) && \
     make install && \
     # 清理源码文件以减小镜像体积
-    rm -rf /tmp/*   
+    rm -rf /tmp/*
+    
+RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2 -O /tmp/gmp.tar.gz && \
+    tar -xf /tmp/gmp.tar.gz -C /tmp && \
+    cd /tmp/gmp-6.2.1/ && \
+    ./configure --prefix=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    # 清理源码文件以减小镜像体积
+    rm -rf /tmp/*
+    
+RUN wget https://ftp.gnu.org/gnu/mpfr/mpfr-4.1.0.tar.bz2 -O /tmp/mpfr.tar.gz && \
+    tar -xf /tmp/mpfr.tar.gz -C /tmp && \
+    cd /tmp/mpfr-4.1.0 && \
+    ./configure --prefix=/usr/local --with-gmp=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    # 清理源码文件以减小镜像体积
+    rm -rf /tmp/*     
 
 # 验证安装
 RUN gcc --version && g++ --version && git --version
