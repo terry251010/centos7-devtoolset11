@@ -1,7 +1,5 @@
 FROM centos:7
 
-ENV GIT_VERSION=2.42.0
-
 # 替换为Vault归档仓库
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
@@ -33,6 +31,16 @@ ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-11/root/usr/lib64:/opt/rh/devtoolset-11/root/usr/lib:$LD_LIBRARY_PATH
 ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
+
+# 3. 下载、解压、编译并安装 Git
+RUN wget https://github.com/git/git/archive/refs/tags/v2.39.0.tar.gz -O /tmp/git.tar.gz && \
+    tar -xf /tmp/git.tar.gz -C /tmp && \
+    cd /tmp/git-2.39.0 && \
+    make configure && \
+    ./configure --prefix=/usr/local && \
+    make all && \
+    make install && \
+    rm -rf /tmp/*
 
 # 验证安装
 RUN gcc --version && g++ --version && git --version
