@@ -22,7 +22,8 @@ RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
     yum makecache
 
 # 安装Devtoolset 11
-RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel wget gettext && \
+RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel \
+                   texinfo wget gettext && \
     yum groupinstall "Development Tools" -y && \
     yum clean all
 
