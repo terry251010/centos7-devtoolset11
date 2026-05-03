@@ -28,16 +28,6 @@ RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-
     yum groupinstall "Development Tools" -y && \
     yum clean all
 
-# 3. 下载、解压、编译并安装 Git
-RUN wget https://github.com{GIT_VERSION}.tar.gz -O /tmp/git.tar.gz && \
-    tar -xf /tmp/git.tar.gz -C /tmp && \
-    cd /tmp/git-${GIT_VERSION} && \
-    make configure && \
-    ./configure --prefix=/usr/local && \
-    make all && \
-    make install && \
-    rm -rf /tmp/*    
-
 # 设置环境变量，永久启用Devtoolset 11
 ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-11/root/usr/lib64:/opt/rh/devtoolset-11/root/usr/lib:$LD_LIBRARY_PATH
