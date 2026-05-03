@@ -1,5 +1,7 @@
 FROM centos:7
 
+ENV GIT_VERSION=2.42.0
+
 # 替换为Vault归档仓库
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
@@ -22,8 +24,19 @@ RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
     yum makecache
 
 # 安装Devtoolset 11
-RUN yum install -y devtoolset-11 && \
+RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel wget && \
+    yum groupinstall "Development Tools" -y && \
     yum clean all
+
+# 3. 下载、解压、编译并安装 Git
+RUN wget https://github.com{GIT_VERSION}.tar.gz -O /tmp/git.tar.gz && \
+    tar -xf /tmp/git.tar.gz -C /tmp && \
+    cd /tmp/git-${GIT_VERSION} && \
+    make configure && \
+    ./configure --prefix=/usr/local && \
+    make all && \
+    make install && \
+    rm -rf /tmp/*    
 
 # 设置环境变量，永久启用Devtoolset 11
 ENV PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
@@ -32,7 +45,7 @@ ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
 
 # 验证安装
-RUN gcc --version && g++ --version
+RUN gcc --version && g++ --version && git --version
 
 # 设置工作目录
 WORKDIR /app

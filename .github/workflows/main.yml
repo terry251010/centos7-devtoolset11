@@ -25,4 +25,4 @@ jobs:
         with:
           context: .
           push: false
-          tags: yourusername/yourimage:latest
+          tags: terryrv/centos7-devtools11:latest
