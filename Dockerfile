@@ -23,7 +23,7 @@ RUN echo '[centos-sclo-sclo]' > /etc/yum.repos.d/CentOS-SCLo-scl.repo && \
 
 # 安装Devtoolset 11
 RUN yum install -y devtoolset-11 git gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl-devel expat-devel \
-                   texinfo wget gettext vim cmake ninja-build rh-python38 && \
+                   texinfo wget gettext vim cmake ninja-build rh-python38 ncurses ncurses-devel && \
     yum groupinstall "Development Tools" -y && \
     yum clean all
 
@@ -41,21 +41,6 @@ RUN wget https://github.com/git/git/archive/refs/tags/v2.39.0.tar.gz -O /tmp/git
     ./configure --prefix=/usr/local && \
     make all && \
     make install && \
-    rm -rf /tmp/*
-
-# 步骤 4：下载、解压、配置、编译并安装 ncurses 静态库
-RUN wget https://github.com/mirror/ncurses/archive/refs/tags/v6.4.tar.gz -O /tmp/ncurse.tar.gz && \
-    tar -xf /tmp/ncurse.tar.gz -C /tmp && \
-    cd /tmp/ncurses-6.4 && \
-    ./configure \
-        --prefix=/usr/local \
-        --without-shared \
-        --with-normal \
-        --enable-widec \
-        --with-termlib && \
-    make -j$(nproc) && \
-    make install && \
-    # 清理源码文件以减小镜像体积
     rm -rf /tmp/*
     
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2 -O /tmp/gmp.tar.gz && \
